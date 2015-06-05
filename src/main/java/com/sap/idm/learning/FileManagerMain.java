@@ -1,18 +1,33 @@
 
 package com.sap.idm.learning;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+
+import com.sap.idm.learning.Commands.PromptOperation;
+import com.sap.idm.learning.Commands.CopyFile;
+import com.sap.idm.learning.Commands.DeleteFile;
+import com.sap.idm.learning.Commands.FileProperties;
+import com.sap.idm.learning.Commands.ListFiles;
+import com.sap.idm.learning.Commands.MoveFile;
+import com.sap.idm.learning.Commands.OpenFile;
+import com.sap.idm.learning.Commands.ProcessInput;
+import com.sap.idm.learning.Commands.PromptCommands;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
 import jline.console.completer.FileNameCompleter;
 import jline.console.completer.StringsCompleter;
 
+
 public class FileManagerMain {
+	
+	private static Map<String, PromptOperation> operations = new HashMap<String, PromptOperation>();
+	
   public static void usage() {
     System.out.println("Usage: java " + FileManagerMain.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
     System.out.println("  none - no completors");
@@ -70,6 +85,7 @@ public class FileManagerMain {
       }
 
       String line;
+      loadOperationObject();
       PrintWriter out = new PrintWriter(reader.getOutput());
 
       while ((line = reader.readLine()) != null) {
@@ -90,72 +106,32 @@ public class FileManagerMain {
           break;
         }
         
-        switch(line) {       
-        case "ls": {
-        	String filePath = reader.readLine();
-        	if(!isNull(filePath)) {
-        	   CommandPrompt.listFiles(openFile(filePath));
-        	} 	      	
-        } break;
+        if(line.equalsIgnoreCase("cls")) {
+        	reader.clearScreen();
+        }
         
-        case "copy": {
-        	String sourceFile = reader.readLine();
-        	String destFile = reader.readLine();
-        	if(!isNull(sourceFile, destFile)) {
-        	   CommandPrompt.copyFiles(openFile(sourceFile), openFile(destFile));
-        	}      	
-        } break;
-        
-        case "move": {
-        	String filePath = reader.readLine();
-        	String destinationPath = reader.readLine();
-        	if(!isNull(filePath, destinationPath)) {
-        	   CommandPrompt.moveFile(openFile(filePath), openFile(destinationPath));
+        if(line != null && !line.equalsIgnoreCase("cls")) {
+        	String command = ProcessInput.getCommand(line);
+
+        	if(operations.containsKey(command)) {
+        		PromptOperation operationObject = operations.get(command);
+        		operationObject.executeOperation(ProcessInput.getArguments(line));
+        	} else {
+        		System.out.println(" Unknown command ");
         	}
-        	
-        } break;   
-        
-        case "properties": {
-        	String filePath = reader.readLine();
-        	if(!isNull(filePath)) {
-        	   CommandPrompt.getInfo(openFile(filePath));
-        	}       	  
-        } break;
-        
-        case "delete": {
-        	String filePath = reader.readLine();
-        	if(!isNull(filePath)) {
-        	   CommandPrompt.deleteFile(openFile(filePath));          	
-        	}     	
-        } break;
-        
-        case "open": {
-        	String fileName = reader.readLine();
-        	if(!isNull(fileName)) {
-        		CommandPrompt.openFile(fileName);
-        	}
-        } break;
-        
-        case "cls": { reader.clearScreen(); } break;
-        
-        default : out.println("Unknown command");
         }
       }
     } catch (Throwable t) {
       t.printStackTrace();
     }
   }
-  
-  private static boolean isNull(String... paths) {
-	  for(String path: paths) {
-		  if(path == null) {
-			  return true;
-		  }
-	  }
-	  return false;
-  }
-  
-  private static File  openFile(String pathToFile) {
-    return new File(pathToFile);
-  }
+
+  private static void loadOperationObject() {		
+		operations.put(PromptCommands.LIST_FILES, new ListFiles());
+		operations.put(PromptCommands.COPY_FILE, new CopyFile());
+		operations.put(PromptCommands.MOVE_FILE, new MoveFile());
+		operations.put(PromptCommands.DELETE_FILE, new DeleteFile());
+		operations.put(PromptCommands.PROPERTIES, new FileProperties());
+		operations.put(PromptCommands.OPEN_FILE, new OpenFile());
+	}
 }
