@@ -48,7 +48,7 @@ public class Download extends ServerOperation {
 		Response response = getResponse();
 		
 		if(isConnectedToServer()) {		
-			if(response.isRequestAccepted()) {	
+			if(response.isRequestExecuted()) {	
 				long fileSize = response.getFileSize();		
     			boolean isDownloaded = download(fileSize);	
     			System.out.println( isDownloaded? OPERATION_SUCCEEDED : OPERATION_FAILED );		 			

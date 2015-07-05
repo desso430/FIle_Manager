@@ -14,7 +14,7 @@ import java.io.ObjectOutputStream;
 public abstract class ServerOperation extends Operation implements IPromptOperation {
 	
 	protected static final File DEFAULT_DOWNLOAD_FOLDER = new File("Download");
-	protected static String LOST_CONNECTION = " Connection with server was lost ";
+	protected static String LOST_CONNECTION = " There is no connection to the server. ";
 	protected static final int BUFFER_SIZE = 40_000;
 	private boolean isConnectionLost = false;
 	

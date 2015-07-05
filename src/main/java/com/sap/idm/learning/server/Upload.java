@@ -46,7 +46,7 @@ public class Upload extends ServerOperation {
 		Response response = getResponse();
 		
 		if(isConnectedToServer()) {
-			if(response.isRequestAccepted()) {	
+			if(response.isRequestExecuted()) {	
 				boolean isFileUploaded = upload();
 				System.out.println( isFileUploaded? OPERATION_SUCCEEDED : OPERATION_FAILED );		 		
 			} else {
