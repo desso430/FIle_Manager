@@ -1,5 +1,5 @@
 
-package com.sap.idm.learning;
+package com.sap.idm.learning.file_manager;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,15 +8,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.sap.idm.learning.Commands.PromptOperation;
-import com.sap.idm.learning.Commands.CopyFile;
-import com.sap.idm.learning.Commands.DeleteFile;
-import com.sap.idm.learning.Commands.FileProperties;
-import com.sap.idm.learning.Commands.ListFiles;
-import com.sap.idm.learning.Commands.MoveFile;
-import com.sap.idm.learning.Commands.OpenFile;
-import com.sap.idm.learning.Commands.ProcessInput;
-import com.sap.idm.learning.Commands.PromptCommands;
+import com.sap.idm.learning.operations.*;
+import com.sap.idm.learning.server.Connect;
+import com.sap.idm.learning.server.Disconnect;
+import com.sap.idm.learning.server.Download;
+import com.sap.idm.learning.server.ListFilesOnServer;
+import com.sap.idm.learning.server.Upload;
 
 import jline.console.ConsoleReader;
 import jline.console.completer.Completer;
@@ -26,7 +23,10 @@ import jline.console.completer.StringsCompleter;
 
 public class FileManagerMain {
 	
-	private static Map<String, PromptOperation> operations = new HashMap<String, PromptOperation>();
+	private static final String EXIT = "exit";
+	private static final String QUIT = "quit";
+	private static final String COMMAND_FOR_CLEAR_SCREEN = "cls";
+	private static Map<String, Operation> operations = new HashMap<String, Operation>();
 	
   public static void usage() {
     System.out.println("Usage: java " + FileManagerMain.class.getName() + " [none/simple/files/dictionary [trigger mask]]");
@@ -84,10 +84,10 @@ public class FileManagerMain {
         reader.addCompleter(c);
       }
 
-      String line;
-      loadOperationObject();
+      String line; 
       PrintWriter out = new PrintWriter(reader.getOutput());
-
+      loadOperationObject();
+      
       while ((line = reader.readLine()) != null) {
         if (color) {
           out.println("\u001B[33m======>\u001B[0m\"" + line + "\"");
@@ -102,19 +102,19 @@ public class FileManagerMain {
         if ((trigger != null) && (line.compareTo(trigger) == 0)) {
           line = reader.readLine("password> ", mask);
         }
-        if (line.equalsIgnoreCase("quit") || line.equalsIgnoreCase("exit")) {
+        if (line.equalsIgnoreCase(QUIT) || line.equalsIgnoreCase(EXIT)) {
           break;
         }
         
-        if(line.equalsIgnoreCase("cls")) {
+        if(line.equalsIgnoreCase(COMMAND_FOR_CLEAR_SCREEN)) {
         	reader.clearScreen();
         }
         
-        if(line != null && !line.equalsIgnoreCase("cls")) {
+        if(line != null && !line.equalsIgnoreCase(COMMAND_FOR_CLEAR_SCREEN)) {
         	String command = ProcessInput.getCommand(line);
 
         	if(operations.containsKey(command)) {
-        		PromptOperation operationObject = operations.get(command);
+        		IPromptOperation operationObject = operations.get(command);
         		operationObject.executeOperation(ProcessInput.getArguments(line));
         	} else {
         		System.out.println(" Unknown command ");
@@ -128,10 +128,16 @@ public class FileManagerMain {
 
   private static void loadOperationObject() {		
 		operations.put(PromptCommands.LIST_FILES, new ListFiles());
+		operations.put(PromptCommands.PROPERTIES, new FileProperties());
 		operations.put(PromptCommands.COPY_FILE, new CopyFile());
 		operations.put(PromptCommands.MOVE_FILE, new MoveFile());
 		operations.put(PromptCommands.DELETE_FILE, new DeleteFile());
-		operations.put(PromptCommands.PROPERTIES, new FileProperties());
 		operations.put(PromptCommands.OPEN_FILE, new OpenFile());
+		operations.put(PromptCommands.HELP, new Help());
+		operations.put(PromptCommands.CONNECT, new Connect());
+		operations.put(PromptCommands.DISCONNECT, new Disconnect());
+		operations.put(PromptCommands.UPLOAD, new Upload());
+		operations.put(PromptCommands.DOWNLOAD, new Download());
+		operations.put(PromptCommands.SERVER_LIST_FILES, new ListFilesOnServer());		
 	}
 }

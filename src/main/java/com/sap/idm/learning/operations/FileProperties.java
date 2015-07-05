@@ -1,15 +1,23 @@
-package com.sap.idm.learning.Commands;
+package com.sap.idm.learning.operations;
 
 import java.io.File;
 import java.util.List;
 
-public class FileProperties extends PromptOperation {
+public class FileProperties extends Operation {
 	
-	private static final int NUMBER_OF_NECESSARY_ARGUMENTS = 1;
 	private static final String SPLIT_STRING_CHARACTER = ".";
 	private static final int INDEX_NOT_FOUND = 0;
 	
+	@Override
+	public void executeOperation(List<String> arguments) {
+		boolean areArgumentsEnough = areArgumentsEnough(ARGUMENTS_ONE, arguments.size());
+		if(areArgumentsEnough) {
+			String pathToFile = arguments.get(ARGUMENTS_ZERO);
+			getInfo(openFile(pathToFile));
+		}		
+	}
 
+	
 	public void getInfo(File file) {
 		if(isValidFile(file)) {
 			System.out.println("----------------------- File Info ----------------------");
@@ -32,14 +40,4 @@ public class FileProperties extends PromptOperation {
 		} 	 
 	   return "";
 	}
-
-	@Override
-	public void executeOperation(List<String> arguments) {
-		boolean areArgumentsNumberCorrect = argumentsNumberCheck(NUMBER_OF_NECESSARY_ARGUMENTS, arguments.size());
-		if(areArgumentsNumberCorrect) {
-			String pathToFile = arguments.get(FIRST_ARGUMENT);
-			getInfo(openFile(pathToFile));
-		}		
-	}
-
 }

@@ -1,11 +1,19 @@
-package com.sap.idm.learning.Commands;
+package com.sap.idm.learning.operations;
 
 import java.io.File;
 import java.util.List;
 
-public class MoveFile extends PromptOperation {
+public class MoveFile extends Operation {
 	
-	private static final int NUMBER_OF_NECESSARY_ARGUMENTS = 2;
+	@Override
+	public void executeOperation(List<String> arguments) {
+		boolean areArgumentsEnough = areArgumentsEnough(ARGUMENTS_TWO, arguments.size());
+		if(areArgumentsEnough) {
+			String pathToFile = arguments.get(ARGUMENTS_ZERO);
+			String directory = arguments.get(ARGUMENTS_ONE);
+			moveFile(openFile(pathToFile), openFile(directory));
+		}
+	}
 	
 	public void moveFile(File file, File directory) {		
 	     if(isValidFile(file)) {
@@ -22,14 +30,5 @@ public class MoveFile extends PromptOperation {
 		 }
 	}
 
-	@Override
-	public void executeOperation(List<String> arguments) {
-		boolean areArgumentsNumberCorrect = argumentsNumberCheck(NUMBER_OF_NECESSARY_ARGUMENTS, arguments.size());
-		if(areArgumentsNumberCorrect) {
-			String pathToFile = arguments.get(FIRST_ARGUMENT);
-			String directory = arguments.get(SECOND_ARGUMENT);
-			moveFile(openFile(pathToFile), openFile(directory));
-		}
-	}
 	
 }
